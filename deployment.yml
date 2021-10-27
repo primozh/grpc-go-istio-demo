@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  labels:
+    app: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+        - name: client-grpc
+          image: primozh/grpc-go-test-client
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: SERVER_ADDRESS
+              value: grpc-server
+            - name: SERVER_PORT
+              value: "8000"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  labels: 
+    app: server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - name: server
+        image: primozh/grpc-go-test-server
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+          name: grpc
+          protocol: TCP
+        env:
+          - name: SERVER_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-server
+spec:
+  selector:
+    app: server
+  ports:
+  - port: 8000
+    targetPort: 8000
+    appProtocol: grpc
+    name: grpc
+

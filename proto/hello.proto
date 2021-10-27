@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/primozh/grpc-go/proto";
+
+package hello;
+
+service HelloService {
+    rpc Greeting(HelloRequest) returns (HelloResponse);
+    rpc Greetings(HelloRequest) returns (stream HelloResponse);
+    rpc GreetingsBi(stream HelloRequest) returns (stream HelloResponse);
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloResponse {
+    string message = 1;
+}
